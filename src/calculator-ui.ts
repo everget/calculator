@@ -59,50 +59,15 @@ export class CalculatorUI {
 		{ key: CalculatorUI.KEYBOARD_SHORTCUTS.BACKSPACE, description: 'Clear' },
 	];
 
+	// WARNING: Do not change the order of the buttons
 	static BUTTONS: ButtonData[] = [
-		{ type: 'digit', id: 'zero', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.ZERO], content: '0' },
-		{ type: 'digit', id: 'one', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.ONE], content: '1' },
-		{ type: 'digit', id: 'two', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.TWO], content: '2' },
-		{ type: 'digit', id: 'three', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.THREE], content: '3' },
-		{ type: 'digit', id: 'four', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.FOUR], content: '4' },
-		{ type: 'digit', id: 'five', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.FIVE], content: '5' },
-		{ type: 'digit', id: 'six', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.SIX], content: '6' },
-		{ type: 'digit', id: 'seven', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.SEVEN], content: '7' },
-		{ type: 'digit', id: 'eight', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.EIGHT], content: '8' },
-		{ type: 'digit', id: 'nine', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.NINE], content: '9' },
-		{ type: 'operator', id: 'add', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.ADD], content: '+' },
-		{
-			type: 'operator',
-			id: 'divide',
-			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.DIVIDE],
-			content: '÷',
-		},
-		{ type: 'operator', id: 'half', keys: [], content: '½' },
-		{
-			type: 'operator',
-			id: 'percent',
-			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.PERCENT],
-			content: '%',
-		},
+		{ type: 'operator', id: 'log', keys: [], content: 'log' },
+		{ type: 'operator', id: 'ln', keys: [], content: 'ln' },
 		{
 			type: 'operator',
 			id: 'power',
 			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.POWER],
 			content: 'x<sup>n</sup>',
-		},
-		{ type: 'operator', id: 'ln', keys: [], content: 'ln' },
-		{ type: 'operator', id: 'log', keys: [], content: 'log' },
-		{
-			type: 'operator',
-			id: 'mod',
-			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.MODULO],
-			content: 'mod',
-		},
-		{
-			type: 'operator',
-			id: 'multiply',
-			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.MULTIPLY],
-			content: '×',
 		},
 		{ type: 'operator', id: 'square', keys: [], content: 'x²' },
 		{
@@ -111,11 +76,45 @@ export class CalculatorUI {
 			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.SQUARE_ROOT],
 			content: '√',
 		},
+		{ type: 'digit', id: 'seven', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.SEVEN], content: '7' },
+		{ type: 'digit', id: 'eight', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.EIGHT], content: '8' },
+		{ type: 'digit', id: 'nine', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.NINE], content: '9' },
+		{
+			type: 'operator',
+			id: 'mod',
+			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.MODULO],
+			content: 'mod',
+		},
+		{
+			type: 'operator',
+			id: 'percent',
+			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.PERCENT],
+			content: '%',
+		},
+		{ type: 'digit', id: 'four', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.FOUR], content: '4' },
+		{ type: 'digit', id: 'five', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.FIVE], content: '5' },
+		{ type: 'digit', id: 'six', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.SIX], content: '6' },
+		{ type: 'operator', id: 'half', keys: [], content: '½' },
+		{
+			type: 'operator',
+			id: 'divide',
+			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.DIVIDE],
+			content: '÷',
+		},
+		{ type: 'digit', id: 'one', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.ONE], content: '1' },
+		{ type: 'digit', id: 'two', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.TWO], content: '2' },
+		{ type: 'digit', id: 'three', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.THREE], content: '3' },
 		{
 			type: 'operator',
 			id: 'subtract',
 			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.SUBTRACT],
 			content: '-',
+		},
+		{
+			type: 'operator',
+			id: 'multiply',
+			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.MULTIPLY],
+			content: '×',
 		},
 		{
 			type: 'control',
@@ -126,12 +125,14 @@ export class CalculatorUI {
 			],
 			content: 'C',
 		},
+		{ type: 'digit', id: 'zero', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.ZERO], content: '0' },
 		{
 			type: 'control',
 			id: 'decimal',
 			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.DECIMAL],
 			content: '.',
 		},
+		{ type: 'operator', id: 'add', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.ADD], content: '+' },
 		{
 			type: 'control',
 			id: 'equals',
@@ -182,7 +183,7 @@ export class CalculatorUI {
                         type="text"
                         value="0"
                         readonly
-                        data-js-id="calculator-display"
+                        data-testid="calculator-display"
                     />
                     ${this.renderButtons(CalculatorUI.BUTTONS)}
                     ${this.renderShortcuts(CalculatorUI.KEYBOARD_SHORTCUTS_DATA)}
@@ -197,7 +198,7 @@ export class CalculatorUI {
 				'<div class="calculator-buttons">',
 				buttons
 					.map((button) => {
-						return `<button class="${button.type} ${button.id === 'clear-all' ? 'clear' : ''} ${button.id === 'equals' ? 'equals' : ''}" data-js-id="${button.id}">${button.content}</button>`;
+						return `<button class="${button.type}${button.id === 'clear-all' ? ' clear' : ''}${button.id === 'equals' ? ' equals' : ''}" data-testid="button-${button.id}">${button.content}</button>`;
 					})
 					.join('\n'),
 				'</div>',
@@ -232,7 +233,7 @@ export class CalculatorUI {
 		document.addEventListener('keyup', this.handleKeyUp.bind(this));
 
 		const buttons = document.querySelectorAll<HTMLButtonElement>(
-			'.calculator button[data-js-id]'
+			'button[data-testid^="button-"]'
 		);
 		buttons.forEach(this.bindButtonEvents.bind(this));
 	}
@@ -245,7 +246,13 @@ export class CalculatorUI {
 	}
 
 	private handleButtonClick(button: HTMLButtonElement): void {
-		const command = button.dataset.jsId;
+		const id = button.getAttribute('data-testid');
+		if (!id) {
+			console.error('Button has no data-testid attribute');
+			return;
+		}
+
+		const command = id?.replace('button-', '');
 		if (command) {
 			this.calculator.handleCommand(command as CommandTag);
 			this.updateDisplay();
@@ -254,7 +261,7 @@ export class CalculatorUI {
 
 	private updateDisplay(): void {
 		const display = document.querySelector<HTMLInputElement>(
-			'.calculator [data-js-id="calculator-display"]'
+			'.calculator [data-testid="calculator-display"]'
 		);
 
 		if (!display) {
@@ -301,7 +308,7 @@ export class CalculatorUI {
 		const commandTag = CalculatorUI.KEY_TO_BUTTON_ID_MAP[key];
 		if (commandTag) {
 			const button = document.querySelector<HTMLButtonElement>(
-				`[data-js-id="${commandTag}"]`
+				`[data-testid="button-${commandTag}"]`
 			);
 			if (button) {
 				button.classList.add('button-pressed');
@@ -314,7 +321,7 @@ export class CalculatorUI {
 		const commandTag = CalculatorUI.KEY_TO_BUTTON_ID_MAP[key];
 		if (commandTag) {
 			const button = document.querySelector<HTMLButtonElement>(
-				`[data-js-id="${commandTag}"]`
+				`[data-testid="button-${commandTag}"]`
 			);
 			if (button) {
 				button.classList.remove('button-pressed');

@@ -13,49 +13,81 @@ test.afterEach(async () => {
 
 async function pressButtons(buttons: string[]) {
 	for (const button of buttons) {
-		await page.click(`[data-js-id="${button}"]`);
+		await page.click(`[data-testid="button-${button}"]`);
 	}
 }
 
 async function getDisplayValue() {
-	return await page.inputValue('[data-js-id="calculator-display"]');
+	return await page.inputValue('[data-testid="calculator-display"]');
 }
 
-test.describe('Calculator E2E Tests', () => {
-	test('Basic arithmetic operations', async () => {
-		await pressButtons(['two', 'add', 'three', 'equals']);
-		expect(await getDisplayValue()).toBe('5');
-
-		await pressButtons(['clear-all', 'five', 'subtract', 'two', 'equals']);
-		expect(await getDisplayValue()).toBe('3');
-
-		await pressButtons(['clear-all', 'four', 'multiply', 'three', 'equals']);
-		expect(await getDisplayValue()).toBe('12');
-
-		await pressButtons(['clear-all', 'eight', 'divide', 'two', 'equals']);
-		expect(await getDisplayValue()).toBe('4');
-	});
-
-	test('Chained operations', async () => {
-		await pressButtons([
-			'two',
-			'add',
-			'three',
-			'multiply',
+test.describe('Calculator UI', () => {
+	test('Button Order Correctness', async () => {
+		const expectedButtonOrder = [
+			'log',
+			'ln',
+			'power',
+			'square',
+			'sqrt',
+			'seven',
+			'eight',
+			'nine',
+			'mod',
+			'percent',
 			'four',
-			'subtract',
+			'five',
 			'six',
+			'half',
+			'divide',
+			'one',
+			'two',
+			'three',
+			'subtract',
+			'multiply',
+			'clear-all',
+			'zero',
+			'decimal',
+			'add',
 			'equals',
-		]);
-		expect(await getDisplayValue()).toBe('14');
+		];
+
+		const buttons = await page.locator('[data-testid^="button-"]').all();
+		const buttonIds = await Promise.all(
+			buttons.map(async (button) => {
+				return await button.getAttribute('data-testid');
+			})
+		);
+
+		expectedButtonOrder.forEach((expectedId, index) => {
+			expect(buttonIds[index]).toBe(`button-${expectedId}`);
+		});
+
+		expect(buttonIds.length).toBe(expectedButtonOrder.length);
+	});
+});
+
+test.describe('Calculator Operations', () => {
+	test('Addition ', async () => {
+		await pressButtons(['zero', 'decimal', 'zero', 'one', 'add', 'two', 'equals']);
+		expect(await getDisplayValue()).toBe('2.01');
 	});
 
-	test('Decimal operations', async () => {
-		await pressButtons(['one', 'decimal', 'five', 'add', 'two', 'decimal', 'seven', 'equals']);
-		expect(await getDisplayValue()).toBe('4.2');
+	test('Subtraction ', async () => {
+		await pressButtons(['five', 'decimal', 'zero', 'one', 'subtract', 'two', 'equals']);
+		expect(await getDisplayValue()).toBe('3.01');
 	});
 
-	test('Percentage calculation', async () => {
+	test('Multiplication ', async () => {
+		await pressButtons(['two', 'multiply', 'two', 'one', 'equals']);
+		expect(await getDisplayValue()).toBe('42');
+	});
+
+	test('Division ', async () => {
+		await pressButtons(['five', 'decimal', 'zero', 'two', 'divide', 'two', 'equals']);
+		expect(await getDisplayValue()).toBe('2.51');
+	});
+
+	test('Percentage', async () => {
 		await pressButtons(['one', 'zero', 'zero', 'percent', 'one', 'equals']);
 		expect(await getDisplayValue()).toBe('1');
 
@@ -63,17 +95,17 @@ test.describe('Calculator E2E Tests', () => {
 		expect(await getDisplayValue()).toBe('5');
 	});
 
-	test('Power function', async () => {
+	test('Power', async () => {
 		await pressButtons(['two', 'power', 'three', 'equals']);
 		expect(await getDisplayValue()).toBe('8');
 	});
 
-	test('Square function', async () => {
+	test('Square', async () => {
 		await pressButtons(['five', 'square']);
 		expect(await getDisplayValue()).toBe('25');
 	});
 
-	test('Square root function', async () => {
+	test('Square root', async () => {
 		await pressButtons(['nine', 'sqrt']);
 		expect(await getDisplayValue()).toBe('3');
 	});
@@ -93,9 +125,30 @@ test.describe('Calculator E2E Tests', () => {
 		expect(await getDisplayValue()).toBe('1');
 	});
 
-	test('Half function', async () => {
+	test('Half', async () => {
 		await pressButtons(['six', 'half']);
 		expect(await getDisplayValue()).toBe('3');
+	});
+
+	test('Clear functionality', async () => {
+		await pressButtons(['five', 'add', 'three', 'clear-all']);
+		expect(await getDisplayValue()).toBe('0');
+	});
+});
+
+test.describe('Calculator Edge Cases & Error Handling', () => {
+	test('Chained operations', async () => {
+		await pressButtons([
+			'two',
+			'add',
+			'three',
+			'multiply',
+			'four',
+			'subtract',
+			'six',
+			'equals',
+		]);
+		expect(await getDisplayValue()).toBe('14');
 	});
 
 	test('Dividing by zero', async () => {
@@ -114,11 +167,6 @@ test.describe('Calculator E2E Tests', () => {
 
 		await pressButtons(['clear-all', 'subtract', 'one', 'log', 'equals']);
 		expect(await getDisplayValue()).toBe('ERROR');
-	});
-
-	test('Clear functionality', async () => {
-		await pressButtons(['five', 'add', 'three', 'clear-all']);
-		expect(await getDisplayValue()).toBe('0');
 	});
 
 	test('Multiple decimal points are ignored', async () => {

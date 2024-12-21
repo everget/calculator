@@ -1,8 +1,9 @@
-_dev
-coverage
 node_modules
-dist
-build
+
+coverage
+tests/e2e/test-results
+tests/e2e/report
+
 .eslintcache
 .windsurfrules
 

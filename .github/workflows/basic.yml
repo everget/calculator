@@ -11,71 +11,101 @@ env:
   HUSKY: 0
 
 jobs:
-  typecheck:
+  install:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v3
         with:
-          version: 8
+          version: 9
       - uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
+          node-version: 'lts/*'
           cache: 'pnpm'
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+      - uses: actions/upload-artifact@v4
+        with:
+          name: node_modules
+          path: node_modules
 
+  typecheck:
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+      - uses: actions/download-artifact@v4
+        with:
+          name: node_modules
       - name: Type Checking
-        run: |
-          pnpm install --frozen-lockfile
-          pnpm run ci:typecheck
+        run: pnpm run ci:typecheck
 
   lint:
     runs-on: ubuntu-latest
+    needs: install
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v3
         with:
-          version: 8
+          version: 9
       - uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
-          cache: 'pnpm'
-
+          node-version: 'lts/*'
+      - uses: actions/download-artifact@v4
+        with:
+          name: node_modules
       - name: Linting
-        run: |
-          pnpm install --frozen-lockfile
-          pnpm run ci:lint
+        run: pnpm run ci:lint
 
   unit-tests:
     runs-on: ubuntu-latest
+    needs: install
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v3
         with:
-          version: 8
+          version: 9
       - uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
-          cache: 'pnpm'
-
+          node-version: 'lts/*'
+      - uses: actions/download-artifact@v4
+        with:
+          name: node_modules
       - name: Unit Testing
-        run: |
-          pnpm install --frozen-lockfile
-          pnpm run ci:test
+        run: pnpm run ci:test
 
   e2e-tests:
-    timeout-minutes: 30
+    timeout-minutes: 15
     runs-on: ubuntu-latest
+    needs: install
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
       - uses: actions/setup-node@v4
         with:
-          node-version: lts/*
-      - name: Install dependencies
-        run: npm install -g pnpm && pnpm install
+          node-version: 'lts/*'
+      - uses: actions/download-artifact@v4
+        with:
+          name: node_modules
+      - name: Cache Playwright Browsers
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps
-      - name: Run Playwright tests
+      - name: Run Playwright Tests
         run: pnpm run ci:test:e2e
+      - name: Ensure Report Directory
+        run: mkdir -p playwright-report
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -1,0 +1,16 @@
+_dev
+dist
+build
+coverage
+playwright
+cypress
+node_modules
+.changeset
+.astro
+.vscode
+tests/e2e/report
+tests/e2e/test-results
+
+.eslintcache
+package-lock.json
+pnpm-lock.yaml

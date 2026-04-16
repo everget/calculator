@@ -16,6 +16,11 @@
 
 	--calculator-max-width: 450px;
 
+	--spacing-sm: 10px;
+	--spacing-md: 20px;
+	--radius-btn: 8px;
+	--radius-container: 12px;
+
 	/* Light theme colors */
 	--color-bg: #f4f4f9;
 	--color-text: #333;
@@ -67,7 +72,6 @@ body {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	font-family: "Arial", sans-serif;
 }
 
 .calculator {
@@ -76,8 +80,8 @@ body {
 	display: grid;
 	grid-template-rows: 1fr auto;
 	width: 100%;
-	padding: 20px;
-	border-radius: 12px;
+	padding: var(--spacing-md);
+	border-radius: var(--radius-container);
 	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
@@ -86,17 +90,17 @@ body {
 	color: var(--color-text);
 	font-size: 2rem;
 	text-align: right;
-	padding: 20px;
+	padding: var(--spacing-md);
 	border: none;
 	width: 100%;
-	margin-bottom: 10px;
+	margin-bottom: var(--spacing-sm);
 	border-radius: 6px;
 }
 
 .calculator-buttons {
 	display: grid;
 	grid-template-columns: repeat(5, 1fr);
-	gap: 10px;
+	gap: var(--spacing-sm);
 }
 
 button {
@@ -104,8 +108,8 @@ button {
 	border: 1px solid var(--color-btn-border);
 	position: relative;
 	font-size: 1.4rem;
-	padding: 15px 10px;
-	border-radius: 8px;
+	padding: 15px var(--spacing-sm);
+	border-radius: var(--radius-btn);
 	cursor: pointer;
 	transition: all 0.1s ease;
 	top: 0;
@@ -154,27 +158,6 @@ button.clear {
 	}
 }
 
-.operator {
-	background-color: var(--color-operator-bg);
-	&:hover {
-		background-color: var(--color-operator-hover-bg);
-	}
-}
-
-.clear {
-	background-color: var(--color-clear-bg);
-	&:hover {
-		background-color: var(--color-clear-hover-bg);
-	}
-}
-
-.equals {
-	background-color: var(--color-equals-bg);
-	&:hover {
-		background-color: var(--color-equals-hover-bg);
-	}
-}
-
 .button-pressed {
 	background-color: var(--color-btn-pressed-bg) !important;
 	box-shadow: 0 1px 2px var(--color-btn-pressed-shadow) !important;
@@ -187,11 +170,11 @@ button.clear {
 	max-width: var(--calculator-max-width);
 	margin-top: 30px;
 	padding: 0 5px;
-	border-radius: 8px;
+	border-radius: var(--radius-btn);
 	font-size: 0.8rem;
 	& h3 {
 		margin-top: 0;
-		margin-bottom: 10px;
+		margin-bottom: var(--spacing-sm);
 		font-size: 1rem;
 		text-align: center;
 	}
@@ -228,12 +211,12 @@ button.clear {
 @media (max-width: 600px) {
 	.calculator {
 		width: 100%;
-		padding: 10px;
+		padding: var(--spacing-sm);
 	}
 
 	.calculator-display {
 		font-size: 1.5rem;
-		padding: 10px;
+		padding: var(--spacing-sm);
 	}
 
 	button {

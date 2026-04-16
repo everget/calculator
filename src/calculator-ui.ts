@@ -87,6 +87,7 @@ export class CalculatorUI {
 			if (button.id === 'equals') btn.classList.add('equals');
 
 			btn.dataset.testid = `button-${button.id}`;
+			btn.dataset.command = button.id;
 			btn.setAttribute('aria-label', button.ariaLabel);
 
 			if (button.keys.length > 0) {
@@ -118,9 +119,7 @@ export class CalculatorUI {
 		const list = document.createElement('div');
 		list.className = 'shortcuts-list';
 
-		const shortcuts: ShortcutData[] = this.deriveShortcutsData();
-
-		shortcuts.forEach(({ key, description }) => {
+		this.deriveShortcutsData().forEach(({ key, description }) => {
 			const item = document.createElement('div');
 			item.className = 'shortcut-item';
 
@@ -142,29 +141,46 @@ export class CalculatorUI {
 	}
 
 	private deriveShortcutsData(): ShortcutData[] {
-		// Group shortcuts logically for the panel
 		const data: ShortcutData[] = [];
 
-		// Digits (0-9)
-		data.push({ key: '0-9', description: 'Digits' });
+		// Digit range — derive from the actual digit button keys
+		const digitKeys = this.buttons
+			.filter((b) => b.type === 'digit' && b.keys.length > 0)
+			.map((b) => b.keys[0])
+			.sort();
+		if (digitKeys.length > 0) {
+			data.push({
+				key: `${digitKeys[0]}-${digitKeys[digitKeys.length - 1]}`,
+				description: 'Digits',
+			});
+		}
 
-		// Basic ops
-		data.push({ key: '+ - * /', description: 'Basic operations' });
+		// Basic arithmetic ops — derive and sort in natural +, -, *, / order
+		const basicOpOrder = ['+', '-', '*', '/'];
+		const basicKeys = this.buttons
+			.filter(
+				(b) =>
+					b.type === 'operator' && b.keys.length > 0 && basicOpOrder.includes(b.keys[0])
+			)
+			.sort((a, b) => basicOpOrder.indexOf(a.keys[0]) - basicOpOrder.indexOf(b.keys[0]))
+			.map((b) => b.keys[0]);
+		if (basicKeys.length > 0) {
+			data.push({ key: basicKeys.join(' '), description: 'Basic operations' });
+		}
 
-		// Functional ops
+		// Other operator shortcuts (individual)
 		this.buttons.forEach((b) => {
-			if (b.type === 'operator' && b.keys.length > 0) {
-				const isBasic = ['+', '-', '*', '/'].includes(b.keys[0]);
-				if (!isBasic) {
-					data.push({ key: b.keys.join(', '), description: b.ariaLabel });
-				}
+			if (b.type === 'operator' && b.keys.length > 0 && !basicOpOrder.includes(b.keys[0])) {
+				data.push({ key: b.keys.join(', '), description: b.ariaLabel });
 			}
 		});
 
-		// Controls
-		data.push({ key: 'Equals, Enter', description: 'Equals' });
-		data.push({ key: 'c, Backspace', description: 'Clear' });
-		data.push({ key: '.', description: 'Decimal' });
+		// Control shortcuts (individual)
+		this.buttons.forEach((b) => {
+			if (b.type === 'control' && b.keys.length > 0) {
+				data.push({ key: b.keys.join(', '), description: b.ariaLabel });
+			}
+		});
 
 		return data;
 	}
@@ -202,7 +218,7 @@ export class CalculatorUI {
 			if (button) button.classList.add('button-pressed');
 		};
 
-		const handlePointerUp = (e: Event) => {
+		const handleMouseRelease = (e: Event) => {
 			const button = (e.target as HTMLElement).closest<HTMLButtonElement>(
 				'button[data-testid^="button-"]'
 			);
@@ -211,29 +227,29 @@ export class CalculatorUI {
 
 		buttonsContainer.addEventListener('click', handleClick);
 		buttonsContainer.addEventListener('mousedown', handleMouseDown);
-		buttonsContainer.addEventListener('mouseup', handlePointerUp);
-		buttonsContainer.addEventListener('mouseleave', handlePointerUp);
+		buttonsContainer.addEventListener('mouseup', handleMouseRelease);
+		buttonsContainer.addEventListener('mouseleave', handleMouseRelease);
 
 		this.cleanup.push(
 			() => buttonsContainer.removeEventListener('click', handleClick),
 			() => buttonsContainer.removeEventListener('mousedown', handleMouseDown),
-			() => buttonsContainer.removeEventListener('mouseup', handlePointerUp),
-			() => buttonsContainer.removeEventListener('mouseleave', handlePointerUp)
+			() => buttonsContainer.removeEventListener('mouseup', handleMouseRelease),
+			() => buttonsContainer.removeEventListener('mouseleave', handleMouseRelease)
 		);
 	}
 
 	private handleButtonClick(button: HTMLButtonElement): void {
-		const testId = button.dataset.testid;
-		if (!testId) {
-			console.error('Button has no data-testid attribute');
+		const command = button.dataset.command;
+		if (!command) {
+			console.error('Button has no data-command attribute');
 			return;
 		}
+		this.dispatchCommand(command as CommandTag);
+	}
 
-		const command = testId.replace('button-', '');
-		if (command) {
-			this.calculator.handleCommand(command as CommandTag);
-			this.updateDisplay();
-		}
+	private dispatchCommand(commandTag: CommandTag): void {
+		this.calculator.handleCommand(commandTag);
+		this.updateDisplay();
 	}
 
 	private updateDisplay(): void {
@@ -250,13 +266,9 @@ export class CalculatorUI {
 			event.preventDefault();
 		}
 
-		// Prevent default behavior for these keys ('%', '&', '^', '#') to avoid unwanted scrolling or other actions
-		if (
-			(event.ctrlKey && (key === '3' || (event.shiftKey && key === '3'))) ||
-			(event.ctrlKey && (key === '5' || (event.shiftKey && key === '5'))) ||
-			(event.ctrlKey && (key === '6' || (event.shiftKey && key === '6'))) ||
-			(event.ctrlKey && (key === '7' || (event.shiftKey && key === '7')))
-		) {
+		// Prevent browser default for Shift+key combos that produce calculator-mapped characters
+		// ('%' = Shift+5, '&' = Shift+7, '^' = Shift+6, '#' = Shift+3)
+		if (event.shiftKey && ['3', '5', '6', '7'].includes(key)) {
 			event.preventDefault();
 		}
 	}
@@ -272,7 +284,7 @@ export class CalculatorUI {
 			const button = this.buttonElements.get(commandTag);
 			if (button) {
 				button.classList.add('button-pressed');
-				button.click();
+				this.dispatchCommand(commandTag);
 			}
 		}
 	}

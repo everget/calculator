@@ -126,21 +126,23 @@ export class Calculator implements ICalculator {
 	}
 
 	getState(): CalculatorState {
-		const state = structuredClone(this.#state);
-		if (state.type === 'entering-number' && this.#state.type === 'entering-number') {
-			state.input = new NumberInput(
-				this.#state.input.value(),
-				this.#state.input.hasDecimal()
-			);
+		if (this.#state.type === 'entering-number') {
+			return {
+				...this.#state,
+				input: new NumberInput(this.#state.input.value(), this.#state.input.hasDecimal()),
+			};
 		}
-		return state;
+		return structuredClone(this.#state);
 	}
 
 	setState(state: CalculatorState): void {
-		this.#state = structuredClone(state);
-		if (this.#state.type === 'entering-number' && state.type === 'entering-number') {
-			// Rehydrate using getters from the original state to avoid type assertions
-			this.#state.input = new NumberInput(state.input.value(), state.input.hasDecimal());
+		if (state.type === 'entering-number') {
+			this.#state = {
+				...state,
+				input: new NumberInput(state.input.value(), state.input.hasDecimal()),
+			};
+		} else {
+			this.#state = structuredClone(state);
 		}
 	}
 
@@ -173,7 +175,7 @@ export class Calculator implements ICalculator {
 				pending: null,
 			};
 		}
-		if (this.isDecimal(command)) {
+		if (command === 'decimal') {
 			return {
 				type: 'entering-number',
 				input: new NumberInput().addDecimal(),
@@ -202,18 +204,18 @@ export class Calculator implements ICalculator {
 		state: Extract<CalculatorState, { type: 'entering-number' }>,
 		command: CommandTag
 	): CalculatorState {
+		const currentValue = state.input.toNumber();
+
 		if (this.isDigit(command)) {
 			return { ...state, input: state.input.addDigit(this.config.digitsMap[command]) };
 		}
-		if (this.isDecimal(command)) {
+		if (command === 'decimal') {
 			return { ...state, input: state.input.addDecimal() };
 		}
 		if (command === 'subtract' && state.input.isEmpty()) {
 			return { ...state, input: state.input.addNegative() };
 		}
 		if (this.isBinaryOperator(command)) {
-			const currentValue = state.input.toNumber();
-
 			if (state.pending) {
 				const result = this.config.binaryOps[state.pending.operator](
 					state.pending.firstOperand,
@@ -222,12 +224,10 @@ export class Calculator implements ICalculator {
 				if (!this.isFiniteNumber(result)) return { type: 'error' };
 				return { type: 'awaiting-operand', operator: command, firstOperand: result };
 			}
-
 			return { type: 'awaiting-operand', operator: command, firstOperand: currentValue };
 		}
 		if (command === 'equals') {
 			if (state.pending) {
-				const currentValue = state.input.toNumber();
 				const result = this.config.binaryOps[state.pending.operator](
 					state.pending.firstOperand,
 					currentValue
@@ -238,7 +238,6 @@ export class Calculator implements ICalculator {
 			return state;
 		}
 		if (this.isUnaryOperator(command)) {
-			const currentValue = state.input.toNumber();
 			const result = this.config.unaryOps[command](currentValue);
 			if (!this.isFiniteNumber(result)) return { type: 'error' };
 			return { ...state, input: NumberInput.fromNumber(result) };
@@ -262,7 +261,7 @@ export class Calculator implements ICalculator {
 				pending,
 			};
 		}
-		if (this.isDecimal(command)) {
+		if (command === 'decimal') {
 			return { type: 'entering-number', input: new NumberInput().addDecimal(), pending };
 		}
 		if (command === 'subtract') {
@@ -298,7 +297,7 @@ export class Calculator implements ICalculator {
 				pending: null,
 			};
 		}
-		if (this.isDecimal(command)) {
+		if (command === 'decimal') {
 			return {
 				type: 'entering-number',
 				input: new NumberInput().addDecimal(),
@@ -318,30 +317,23 @@ export class Calculator implements ICalculator {
 
 	// --- Utilities ---
 
-	private isFiniteNumber(value: unknown): boolean {
-		return typeof value === 'number' && Number.isFinite(value);
+	private isFiniteNumber(value: number): boolean {
+		return Number.isFinite(value);
 	}
 
 	private isValidCommand(command: unknown): command is CommandTag {
-		return (
-			typeof command === 'string' &&
-			this.config.validCommands.includes(command as unknown as CommandTag)
-		);
+		return typeof command === 'string' && this.config.validCommands.has(command as CommandTag);
 	}
 
 	private isUnaryOperator(command: CommandTag): command is UnaryOperationTag {
-		return Object.keys(this.config.unaryOps).includes(command);
+		return this.config.unaryTags.has(command as UnaryOperationTag);
 	}
 
 	private isBinaryOperator(command: CommandTag): command is BinaryOperationTag {
-		return Object.keys(this.config.binaryOps).includes(command);
+		return this.config.binaryTags.has(command as BinaryOperationTag);
 	}
 
 	private isDigit(command: CommandTag): command is DigitTag {
-		return Object.keys(this.config.digitsMap).includes(command);
-	}
-
-	private isDecimal(command: CommandTag): command is 'decimal' {
-		return command === 'decimal';
+		return this.config.digitTags.has(command as DigitTag);
 	}
 }

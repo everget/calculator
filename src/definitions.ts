@@ -37,6 +37,7 @@ type AreAllMutuallyExclusive<T extends readonly unknown[]> = T extends [
 
 export type ControlTag = 'clear-all' | 'equals' | 'decimal';
 
+// Compile error here means two command tag groups share a string literal.
 export type CommandTag =
 	AreAllMutuallyExclusive<
 		[DigitTag, UnaryOperationTag, BinaryOperationTag, ControlTag]
@@ -44,253 +45,207 @@ export type CommandTag =
 		? DigitTag | UnaryOperationTag | BinaryOperationTag | ControlTag
 		: never;
 
-export interface CommandDefinition {
-	id: CommandTag;
-	type: 'digit' | 'operator' | 'control';
+// --- Command definitions (discriminated union) ---
+
+interface BaseCommandDef {
 	keys: string[];
 	content: string;
 	ariaLabel: string;
-	digitValue?: string;
-	unaryFn?: (a: number) => number;
-	binaryFn?: (a: number, b: number) => number;
 }
 
-// IMPORTANT: Do not change the order of the buttons. The order in this array determines the layout in the UI.
+export interface DigitCommandDef extends BaseCommandDef {
+	type: 'digit';
+	id: DigitTag;
+	digitValue: string;
+}
+
+export interface UnaryCommandDef extends BaseCommandDef {
+	type: 'unary-operator';
+	id: UnaryOperationTag;
+	fn: (a: number) => number;
+}
+
+export interface BinaryCommandDef extends BaseCommandDef {
+	type: 'binary-operator';
+	id: BinaryOperationTag;
+	fn: (a: number, b: number) => number;
+}
+
+export interface ControlCommandDef extends BaseCommandDef {
+	type: 'control';
+	id: ControlTag;
+}
+
+export type CommandDefinition =
+	| DigitCommandDef
+	| UnaryCommandDef
+	| BinaryCommandDef
+	| ControlCommandDef;
+
+// IMPORTANT: Do not change the order of the entries. The order determines the button layout in the UI.
 export const COMMAND_REGISTRY: CommandDefinition[] = [
 	{
+		type: 'binary-operator',
 		id: 'log',
-		type: 'operator',
 		keys: [],
 		content: 'log',
 		ariaLabel: 'Logarithm',
-		binaryFn: (a, b) => Math.log(a) / Math.log(b),
+		fn: (a, b) => Math.log(a) / Math.log(b),
 	},
 	{
+		type: 'unary-operator',
 		id: 'ln',
-		type: 'operator',
 		keys: [],
 		content: 'ln',
 		ariaLabel: 'Natural logarithm',
-		unaryFn: (a) => Math.log(a),
+		fn: (a) => Math.log(a),
 	},
 	{
+		type: 'binary-operator',
 		id: 'power',
-		type: 'operator',
 		keys: ['^'],
 		content: 'x<sup>n</sup>',
 		ariaLabel: 'Power',
-		binaryFn: (a, b) => a ** b,
+		fn: (a, b) => a ** b,
 	},
 	{
+		type: 'unary-operator',
 		id: 'square',
-		type: 'operator',
 		keys: [],
 		content: 'x²',
 		ariaLabel: 'Square',
-		unaryFn: (a) => a ** 2,
+		fn: (a) => a ** 2,
 	},
 	{
+		type: 'unary-operator',
 		id: 'sqrt',
-		type: 'operator',
 		keys: ['#'],
 		content: '√',
 		ariaLabel: 'Square root',
-		unaryFn: (a) => Math.sqrt(a),
+		fn: (a) => Math.sqrt(a),
 	},
+	{ type: 'digit', id: 'seven', keys: ['7'], content: '7', ariaLabel: '7', digitValue: '7' },
+	{ type: 'digit', id: 'eight', keys: ['8'], content: '8', ariaLabel: '8', digitValue: '8' },
+	{ type: 'digit', id: 'nine', keys: ['9'], content: '9', ariaLabel: '9', digitValue: '9' },
 	{
-		id: 'seven',
-		type: 'digit',
-		keys: ['7'],
-		content: '7',
-		ariaLabel: '7',
-		digitValue: '7',
-	},
-	{
-		id: 'eight',
-		type: 'digit',
-		keys: ['8'],
-		content: '8',
-		ariaLabel: '8',
-		digitValue: '8',
-	},
-	{
-		id: 'nine',
-		type: 'digit',
-		keys: ['9'],
-		content: '9',
-		ariaLabel: '9',
-		digitValue: '9',
-	},
-	{
+		type: 'binary-operator',
 		id: 'mod',
-		type: 'operator',
 		keys: ['&'],
 		content: 'mod',
 		ariaLabel: 'Modulo',
-		binaryFn: (a, b) => a % b,
+		fn: (a, b) => a % b,
 	},
 	{
+		type: 'binary-operator',
 		id: 'percent',
-		type: 'operator',
 		keys: ['%'],
 		content: '%',
 		ariaLabel: 'Percent',
-		binaryFn: (a, b) => (a * b) / 100,
+		fn: (a, b) => (a * b) / 100,
 	},
+	{ type: 'digit', id: 'four', keys: ['4'], content: '4', ariaLabel: '4', digitValue: '4' },
+	{ type: 'digit', id: 'five', keys: ['5'], content: '5', ariaLabel: '5', digitValue: '5' },
+	{ type: 'digit', id: 'six', keys: ['6'], content: '6', ariaLabel: '6', digitValue: '6' },
 	{
-		id: 'four',
-		type: 'digit',
-		keys: ['4'],
-		content: '4',
-		ariaLabel: '4',
-		digitValue: '4',
-	},
-	{
-		id: 'five',
-		type: 'digit',
-		keys: ['5'],
-		content: '5',
-		ariaLabel: '5',
-		digitValue: '5',
-	},
-	{
-		id: 'six',
-		type: 'digit',
-		keys: ['6'],
-		content: '6',
-		ariaLabel: '6',
-		digitValue: '6',
-	},
-	{
+		type: 'unary-operator',
 		id: 'half',
-		type: 'operator',
 		keys: [],
 		content: '½',
 		ariaLabel: 'Half',
-		unaryFn: (a) => a / 2,
+		fn: (a) => a / 2,
 	},
 	{
+		type: 'binary-operator',
 		id: 'divide',
-		type: 'operator',
 		keys: ['/'],
 		content: '÷',
 		ariaLabel: 'Divide',
-		binaryFn: (a, b) => a / b,
+		fn: (a, b) => a / b,
 	},
+	{ type: 'digit', id: 'one', keys: ['1'], content: '1', ariaLabel: '1', digitValue: '1' },
+	{ type: 'digit', id: 'two', keys: ['2'], content: '2', ariaLabel: '2', digitValue: '2' },
+	{ type: 'digit', id: 'three', keys: ['3'], content: '3', ariaLabel: '3', digitValue: '3' },
 	{
-		id: 'one',
-		type: 'digit',
-		keys: ['1'],
-		content: '1',
-		ariaLabel: '1',
-		digitValue: '1',
-	},
-	{
-		id: 'two',
-		type: 'digit',
-		keys: ['2'],
-		content: '2',
-		ariaLabel: '2',
-		digitValue: '2',
-	},
-	{
-		id: 'three',
-		type: 'digit',
-		keys: ['3'],
-		content: '3',
-		ariaLabel: '3',
-		digitValue: '3',
-	},
-	{
+		type: 'binary-operator',
 		id: 'subtract',
-		type: 'operator',
 		keys: ['-'],
 		content: '-',
 		ariaLabel: 'Subtract',
-		binaryFn: (a, b) => a - b,
+		fn: (a, b) => a - b,
 	},
 	{
+		type: 'binary-operator',
 		id: 'multiply',
-		type: 'operator',
 		keys: ['*'],
 		content: '×',
 		ariaLabel: 'Multiply',
-		binaryFn: (a, b) => a * b,
+		fn: (a, b) => a * b,
 	},
 	{
-		id: 'clear-all',
 		type: 'control',
+		id: 'clear-all',
 		keys: ['c', 'Backspace'],
 		content: 'C',
 		ariaLabel: 'Clear all',
 	},
+	{ type: 'digit', id: 'zero', keys: ['0'], content: '0', ariaLabel: '0', digitValue: '0' },
+	{ type: 'control', id: 'decimal', keys: ['.'], content: '.', ariaLabel: 'Decimal point' },
 	{
-		id: 'zero',
-		type: 'digit',
-		keys: ['0'],
-		content: '0',
-		ariaLabel: '0',
-		digitValue: '0',
-	},
-	{
-		id: 'decimal',
-		type: 'control',
-		keys: ['.'],
-		content: '.',
-		ariaLabel: 'Decimal point',
-	},
-	{
+		type: 'binary-operator',
 		id: 'add',
-		type: 'operator',
 		keys: ['+'],
 		content: '+',
 		ariaLabel: 'Add',
-		binaryFn: (a, b) => a + b,
+		fn: (a, b) => a + b,
 	},
-	{
-		id: 'equals',
-		type: 'control',
-		keys: ['=', 'Enter'],
-		content: '=',
-		ariaLabel: 'Equals',
-	},
+	{ type: 'control', id: 'equals', keys: ['=', 'Enter'], content: '=', ariaLabel: 'Equals' },
 ];
+
+// --- CalculatorConfig ---
 
 export interface CalculatorConfig {
 	errorMsg: string;
 	digitsMap: Record<DigitTag, string>;
 	unaryOps: Record<UnaryOperationTag, (a: number) => number>;
 	binaryOps: Record<BinaryOperationTag, (a: number, b: number) => number>;
-	validCommands: CommandTag[];
+	validCommands: ReadonlySet<CommandTag>;
+	digitTags: ReadonlySet<DigitTag>;
+	unaryTags: ReadonlySet<UnaryOperationTag>;
+	binaryTags: ReadonlySet<BinaryOperationTag>;
 }
 
-export function getCalculatorConfig(): CalculatorConfig {
-	const digitsMap: Partial<Record<DigitTag, string>> = {};
-	const unaryOps: Partial<Record<UnaryOperationTag, (a: number) => number>> = {};
-	const binaryOps: Partial<Record<BinaryOperationTag, (a: number, b: number) => number>> = {};
-	const validCommands: CommandTag[] = [];
+function buildCalculatorConfig(): CalculatorConfig {
+	const digitsMap = {} as Record<DigitTag, string>;
+	const unaryOps = {} as Record<UnaryOperationTag, (a: number) => number>;
+	const binaryOps = {} as Record<BinaryOperationTag, (a: number, b: number) => number>;
+	const validCommands = new Set<CommandTag>();
 
-	COMMAND_REGISTRY.forEach((def) => {
-		validCommands.push(def.id);
-		if (def.type === 'digit' && def.digitValue) {
-			digitsMap[def.id as DigitTag] = def.digitValue;
-		} else if (def.type === 'operator') {
-			if (def.unaryFn) {
-				unaryOps[def.id as UnaryOperationTag] = def.unaryFn;
-			} else if (def.binaryFn) {
-				binaryOps[def.id as BinaryOperationTag] = def.binaryFn;
-			}
+	for (const def of COMMAND_REGISTRY) {
+		validCommands.add(def.id);
+		if (def.type === 'digit') {
+			digitsMap[def.id] = def.digitValue;
+		} else if (def.type === 'unary-operator') {
+			unaryOps[def.id] = def.fn;
+		} else if (def.type === 'binary-operator') {
+			binaryOps[def.id] = def.fn;
 		}
-	});
+	}
 
 	return {
 		errorMsg: 'ERROR',
-		digitsMap: digitsMap as Record<DigitTag, string>,
-		unaryOps: unaryOps as Record<UnaryOperationTag, (a: number) => number>,
-		binaryOps: binaryOps as Record<BinaryOperationTag, (a: number, b: number) => number>,
+		digitsMap,
+		unaryOps,
+		binaryOps,
 		validCommands,
+		digitTags: new Set(Object.keys(digitsMap)) as ReadonlySet<DigitTag>,
+		unaryTags: new Set(Object.keys(unaryOps)) as ReadonlySet<UnaryOperationTag>,
+		binaryTags: new Set(Object.keys(binaryOps)) as ReadonlySet<BinaryOperationTag>,
 	};
 }
+
+export const CALCULATOR_CONFIG: CalculatorConfig = buildCalculatorConfig();
+
+// --- UIButtonDefinition ---
 
 export interface UIButtonDefinition {
 	type: 'operator' | 'digit' | 'control';
@@ -300,12 +255,11 @@ export interface UIButtonDefinition {
 	ariaLabel: string;
 }
 
-export function getUIButtonDefinitions(): UIButtonDefinition[] {
-	return COMMAND_REGISTRY.map((def) => ({
-		type: def.type,
-		id: def.id,
-		keys: def.keys,
-		content: def.content,
-		ariaLabel: def.ariaLabel,
-	}));
-}
+export const UI_BUTTON_DEFINITIONS: UIButtonDefinition[] = COMMAND_REGISTRY.map((def) => ({
+	type:
+		def.type === 'digit' ? 'digit' : def.type === 'control' ? ('control' as const) : 'operator',
+	id: def.id,
+	keys: def.keys,
+	content: def.content,
+	ariaLabel: def.ariaLabel,
+}));

@@ -1,13 +1,10 @@
 import { Calculator } from './calculator';
 import { CalculatorUI } from './calculator-ui';
-import { getCalculatorConfig, getUIButtonDefinitions } from './definitions';
+import { CALCULATOR_CONFIG, UI_BUTTON_DEFINITIONS } from './definitions';
 import './index.css';
 
 const appRoot = document.querySelector<HTMLDivElement>('#app')!;
 
-const calculatorConfig = getCalculatorConfig();
-const buttonDefinitions = getUIButtonDefinitions();
-
-const calculator = new Calculator(calculatorConfig);
-const ui = new CalculatorUI(calculator, buttonDefinitions);
+const calculator = new Calculator(CALCULATOR_CONFIG);
+const ui = new CalculatorUI(calculator, UI_BUTTON_DEFINITIONS);
 ui.mount(appRoot);

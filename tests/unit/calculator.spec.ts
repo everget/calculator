@@ -1,10 +1,10 @@
 import { Calculator } from '@/src/calculator';
-import { getCalculatorConfig, getUIButtonDefinitions, type CommandTag } from '@/src/definitions';
+import { CALCULATOR_CONFIG, UI_BUTTON_DEFINITIONS, type CommandTag } from '@/src/definitions';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('Calculator', () => {
-    const config = getCalculatorConfig();
-	const buttons = getUIButtonDefinitions();
+	const config = CALCULATOR_CONFIG;
+	const buttons = UI_BUTTON_DEFINITIONS;
 
 	const contentToIdMap = buttons.reduce(
 		(acc, button) => {

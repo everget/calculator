@@ -1,5 +1,7 @@
 node_modules
 
+_dev/*
+
 coverage
 tests/e2e/test-results
 tests/e2e/report

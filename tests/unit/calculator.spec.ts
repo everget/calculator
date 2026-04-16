@@ -338,4 +338,42 @@ describe('Calculator', () => {
 			expect(Number(calculator.getDisplayValue())).toBeCloseTo(0.3333333, 5);
 		});
 	});
+
+	describe('Input Constraints', () => {
+		it('should cap the display buffer at 15 digits', () => {
+			for (let i = 0; i < 20; i++) {
+				calculator.handleCommand('nine');
+			}
+			expect(calculator.getDisplayValue().length).toBe(15);
+			expect(calculator.getDisplayValue()).toBe('9'.repeat(15));
+		});
+
+		it('should allow decimals safely within the limit', () => {
+			for (let i = 0; i < 14; i++) {
+				calculator.handleCommand('three');
+			}
+			calculator.handleCommand('decimal');
+			for (let i = 0; i < 5; i++) {
+				calculator.handleCommand('three');
+			}
+			expect(calculator.getDisplayValue().length).toBe(16); // 15 digits + 1 decimal
+		});
+	});
+
+	describe('State Serialization Verification', () => {
+		it('should seamlessly resume operations after extracting and loading state', () => {
+			pressButtons(['five', 'add', 'one', 'zero']);
+			const extractedState = calculator.getState();
+
+			const newCalculator = new Calculator();
+			newCalculator.setState(extractedState);
+			newCalculator.handleCommand('equals');
+			expect(newCalculator.getDisplayValue()).toBe('15');
+
+			newCalculator.handleCommand('multiply');
+			newCalculator.handleCommand('two');
+			newCalculator.handleCommand('equals');
+			expect(newCalculator.getDisplayValue()).toBe('30');
+		});
+	});
 });

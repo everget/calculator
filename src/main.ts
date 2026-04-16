@@ -4,4 +4,6 @@ import './index.css';
 
 const appRoot = document.querySelector<HTMLDivElement>('#app')!;
 
-new CalculatorUI(appRoot, new Calculator());
+const calculator = new Calculator();
+const ui = new CalculatorUI(calculator);
+ui.mount(appRoot);

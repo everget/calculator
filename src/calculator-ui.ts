@@ -5,6 +5,7 @@ interface ButtonData {
 	id: CommandTag;
 	keys: string[];
 	content: string;
+	ariaLabel: string;
 }
 
 interface ShortcutData {
@@ -61,60 +62,121 @@ export class CalculatorUI {
 
 	// WARNING: Do not change the order of the buttons
 	static BUTTONS: ButtonData[] = [
-		{ type: 'operator', id: 'log', keys: [], content: 'log' },
-		{ type: 'operator', id: 'ln', keys: [], content: 'ln' },
+		{ type: 'operator', id: 'log', keys: [], content: 'log', ariaLabel: 'Logarithm' },
+		{ type: 'operator', id: 'ln', keys: [], content: 'ln', ariaLabel: 'Natural logarithm' },
 		{
 			type: 'operator',
 			id: 'power',
 			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.POWER],
 			content: 'x<sup>n</sup>',
+			ariaLabel: 'Power',
 		},
-		{ type: 'operator', id: 'square', keys: [], content: 'x²' },
+		{ type: 'operator', id: 'square', keys: [], content: 'x²', ariaLabel: 'Square' },
 		{
 			type: 'operator',
 			id: 'sqrt',
 			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.SQUARE_ROOT],
 			content: '√',
+			ariaLabel: 'Square root',
 		},
-		{ type: 'digit', id: 'seven', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.SEVEN], content: '7' },
-		{ type: 'digit', id: 'eight', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.EIGHT], content: '8' },
-		{ type: 'digit', id: 'nine', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.NINE], content: '9' },
+		{
+			type: 'digit',
+			id: 'seven',
+			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.SEVEN],
+			content: '7',
+			ariaLabel: '7',
+		},
+		{
+			type: 'digit',
+			id: 'eight',
+			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.EIGHT],
+			content: '8',
+			ariaLabel: '8',
+		},
+		{
+			type: 'digit',
+			id: 'nine',
+			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.NINE],
+			content: '9',
+			ariaLabel: '9',
+		},
 		{
 			type: 'operator',
 			id: 'mod',
 			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.MODULO],
 			content: 'mod',
+			ariaLabel: 'Modulo',
 		},
 		{
 			type: 'operator',
 			id: 'percent',
 			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.PERCENT],
 			content: '%',
+			ariaLabel: 'Percent',
 		},
-		{ type: 'digit', id: 'four', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.FOUR], content: '4' },
-		{ type: 'digit', id: 'five', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.FIVE], content: '5' },
-		{ type: 'digit', id: 'six', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.SIX], content: '6' },
-		{ type: 'operator', id: 'half', keys: [], content: '½' },
+		{
+			type: 'digit',
+			id: 'four',
+			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.FOUR],
+			content: '4',
+			ariaLabel: '4',
+		},
+		{
+			type: 'digit',
+			id: 'five',
+			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.FIVE],
+			content: '5',
+			ariaLabel: '5',
+		},
+		{
+			type: 'digit',
+			id: 'six',
+			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.SIX],
+			content: '6',
+			ariaLabel: '6',
+		},
+		{ type: 'operator', id: 'half', keys: [], content: '½', ariaLabel: 'Half' },
 		{
 			type: 'operator',
 			id: 'divide',
 			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.DIVIDE],
 			content: '÷',
+			ariaLabel: 'Divide',
 		},
-		{ type: 'digit', id: 'one', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.ONE], content: '1' },
-		{ type: 'digit', id: 'two', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.TWO], content: '2' },
-		{ type: 'digit', id: 'three', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.THREE], content: '3' },
+		{
+			type: 'digit',
+			id: 'one',
+			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.ONE],
+			content: '1',
+			ariaLabel: '1',
+		},
+		{
+			type: 'digit',
+			id: 'two',
+			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.TWO],
+			content: '2',
+			ariaLabel: '2',
+		},
+		{
+			type: 'digit',
+			id: 'three',
+			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.THREE],
+			content: '3',
+			ariaLabel: '3',
+		},
 		{
 			type: 'operator',
 			id: 'subtract',
 			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.SUBTRACT],
 			content: '-',
+			ariaLabel: 'Subtract',
 		},
 		{
 			type: 'operator',
 			id: 'multiply',
 			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.MULTIPLY],
 			content: '×',
+			ariaLabel: 'Multiply',
 		},
 		{
 			type: 'control',
@@ -124,20 +186,35 @@ export class CalculatorUI {
 				CalculatorUI.KEYBOARD_SHORTCUTS.BACKSPACE,
 			],
 			content: 'C',
+			ariaLabel: 'Clear all',
 		},
-		{ type: 'digit', id: 'zero', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.ZERO], content: '0' },
+		{
+			type: 'digit',
+			id: 'zero',
+			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.ZERO],
+			content: '0',
+			ariaLabel: '0',
+		},
 		{
 			type: 'control',
 			id: 'decimal',
 			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.DECIMAL],
 			content: '.',
+			ariaLabel: 'Decimal point',
 		},
-		{ type: 'operator', id: 'add', keys: [CalculatorUI.KEYBOARD_SHORTCUTS.ADD], content: '+' },
+		{
+			type: 'operator',
+			id: 'add',
+			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.ADD],
+			content: '+',
+			ariaLabel: 'Add',
+		},
 		{
 			type: 'control',
 			id: 'equals',
 			keys: [CalculatorUI.KEYBOARD_SHORTCUTS.EQUALS, CalculatorUI.KEYBOARD_SHORTCUTS.ENTER],
 			content: '=',
+			ariaLabel: 'Equals',
 		},
 	];
 
@@ -167,92 +244,187 @@ export class CalculatorUI {
 	} as const;
 
 	private calculator: ICalculator;
+	private root: HTMLElement | null = null;
+	private displayElement: HTMLInputElement | null = null;
+	private buttonElements = new Map<CommandTag, HTMLButtonElement>();
+	private cleanup: (() => void)[] = [];
 
-	constructor(root: HTMLElement, calculator: ICalculator) {
+	constructor(calculator: ICalculator) {
 		this.calculator = calculator;
-		this.render(root);
-		this.addEventListeners();
 	}
 
-	private render(root: HTMLElement) {
-		root.innerHTML = `
-            <div class="calculator-container">
-                <div class="calculator">
-                    <input
-                        class="calculator-display"
-                        type="text"
-                        value="0"
-                        readonly
-                        data-testid="calculator-display"
-                    />
-                    ${this.renderButtons(CalculatorUI.BUTTONS)}
-                    ${this.renderShortcuts(CalculatorUI.KEYBOARD_SHORTCUTS_DATA)}
-                </div>
-			</div>
-        `;
+	mount(root: HTMLElement): void {
+		this.root = root;
+		this.render();
+		this.attachEventListeners();
 	}
 
-	private renderButtons(buttons: ButtonData[]): string {
-		return ''.concat(
-			...[
-				'<div class="calculator-buttons">',
-				buttons
-					.map((button) => {
-						return `<button class="${button.type}${button.id === 'clear-all' ? ' clear' : ''}${button.id === 'equals' ? ' equals' : ''}" data-testid="button-${button.id}">${button.content}</button>`;
-					})
-					.join('\n'),
-				'</div>',
-			]
+	unmount(): void {
+		this.cleanup.forEach((fn) => fn());
+		this.cleanup = [];
+		this.buttonElements.clear();
+		this.displayElement = null;
+
+		if (this.root) {
+			this.root.innerHTML = '';
+			this.root = null;
+		}
+	}
+
+	private render(): void {
+		if (!this.root) return;
+
+		const container = document.createElement('div');
+		container.className = 'calculator-container';
+
+		const calculator = document.createElement('div');
+		calculator.className = 'calculator';
+
+		// Display
+		const display = document.createElement('input');
+		display.className = 'calculator-display';
+		display.type = 'text';
+		display.value = '0';
+		display.readOnly = true;
+		display.dataset.testid = 'calculator-display';
+		display.setAttribute('aria-label', 'Calculator display');
+		display.setAttribute('aria-live', 'polite');
+		display.setAttribute('aria-atomic', 'true');
+		this.displayElement = display;
+
+		calculator.appendChild(display);
+		calculator.appendChild(this.createButtonsElement());
+		calculator.appendChild(this.createShortcutsElement());
+
+		container.appendChild(calculator);
+		this.root.appendChild(container);
+	}
+
+	private createButtonsElement(): HTMLElement {
+		const container = document.createElement('div');
+		container.className = 'calculator-buttons';
+
+		CalculatorUI.BUTTONS.forEach((button) => {
+			const btn = document.createElement('button');
+			btn.className = button.type;
+
+			if (button.id === 'clear-all') btn.classList.add('clear');
+			if (button.id === 'equals') btn.classList.add('equals');
+
+			btn.dataset.testid = `button-${button.id}`;
+			btn.setAttribute('aria-label', button.ariaLabel);
+
+			if (button.keys.length > 0) {
+				btn.title = `Keyboard: ${button.keys.join(', ')}`;
+			}
+
+			// Use innerHTML only for the power button which contains <sup>
+			if (button.content.includes('<')) {
+				btn.innerHTML = button.content;
+			} else {
+				btn.textContent = button.content;
+			}
+
+			this.buttonElements.set(button.id, btn);
+			container.appendChild(btn);
+		});
+
+		return container;
+	}
+
+	private createShortcutsElement(): HTMLElement {
+		const panel = document.createElement('div');
+		panel.className = 'shortcuts-panel';
+
+		const heading = document.createElement('h3');
+		heading.textContent = 'Keyboard Shortcuts';
+		panel.appendChild(heading);
+
+		const list = document.createElement('div');
+		list.className = 'shortcuts-list';
+
+		CalculatorUI.KEYBOARD_SHORTCUTS_DATA.forEach(({ key, description }) => {
+			const item = document.createElement('div');
+			item.className = 'shortcut-item';
+
+			const keySpan = document.createElement('span');
+			keySpan.className = 'shortcut-item__key';
+			keySpan.textContent = key;
+
+			const descSpan = document.createElement('span');
+			descSpan.className = 'shortcut-item__description';
+			descSpan.textContent = description;
+
+			item.appendChild(keySpan);
+			item.appendChild(descSpan);
+			list.appendChild(item);
+		});
+
+		panel.appendChild(list);
+		return panel;
+	}
+
+	private attachEventListeners(): void {
+		if (!this.root) return;
+
+		// Keyboard listeners
+		const handleKeyDown = this.handleKeyDown.bind(this);
+		const handleKeyUp = this.handleKeyUp.bind(this);
+
+		document.addEventListener('keydown', handleKeyDown);
+		document.addEventListener('keyup', handleKeyUp);
+
+		this.cleanup.push(
+			() => document.removeEventListener('keydown', handleKeyDown),
+			() => document.removeEventListener('keyup', handleKeyUp)
 		);
-	}
 
-	private renderShortcuts(shortcuts: ShortcutData[]): string {
-		return ''.concat(
-			...[
-				'<div class="shortcuts-panel">',
-				'<h3>Keyboard Shortcuts</h3>',
-				'<div class="shortcuts-list">',
-				shortcuts
-					.map(({ key, description }) => {
-						return `
-                            <div class="shortcut-item">
-                                <span class="shortcut-item__key">${key}</span>
-                                <span class="shortcut-item__description">${description}</span>
-                            </div>
-                    `;
-					})
-					.join('\n'),
-				'</div>',
-				'</div>',
-			]
+		// Delegated button listeners
+		const buttonsContainer = this.root.querySelector('.calculator-buttons');
+		if (!buttonsContainer) return;
+
+		const handleClick = (e: Event) => {
+			const button = (e.target as HTMLElement).closest<HTMLButtonElement>(
+				'button[data-testid^="button-"]'
+			);
+			if (button) this.handleButtonClick(button);
+		};
+
+		const handleMouseDown = (e: Event) => {
+			const button = (e.target as HTMLElement).closest<HTMLButtonElement>(
+				'button[data-testid^="button-"]'
+			);
+			if (button) button.classList.add('button-pressed');
+		};
+
+		const handlePointerUp = (e: Event) => {
+			const button = (e.target as HTMLElement).closest<HTMLButtonElement>(
+				'button[data-testid^="button-"]'
+			);
+			if (button) button.classList.remove('button-pressed');
+		};
+
+		buttonsContainer.addEventListener('click', handleClick);
+		buttonsContainer.addEventListener('mousedown', handleMouseDown);
+		buttonsContainer.addEventListener('mouseup', handlePointerUp);
+		buttonsContainer.addEventListener('mouseleave', handlePointerUp);
+
+		this.cleanup.push(
+			() => buttonsContainer.removeEventListener('click', handleClick),
+			() => buttonsContainer.removeEventListener('mousedown', handleMouseDown),
+			() => buttonsContainer.removeEventListener('mouseup', handlePointerUp),
+			() => buttonsContainer.removeEventListener('mouseleave', handlePointerUp)
 		);
-	}
-
-	private addEventListeners(): void {
-		document.addEventListener('keydown', this.handleKeyDown.bind(this));
-		document.addEventListener('keyup', this.handleKeyUp.bind(this));
-
-		const buttons = document.querySelectorAll<HTMLButtonElement>(
-			'button[data-testid^="button-"]'
-		);
-		buttons.forEach(this.bindButtonEvents.bind(this));
-	}
-
-	private bindButtonEvents(button: HTMLButtonElement): void {
-		button.onclick = () => this.handleButtonClick(button);
-		button.onmousedown = () => this.addButtonPressedClass(button);
-		button.onmouseup = () => this.removeButtonPressedClass(button);
-		button.onmouseleave = () => this.removeButtonPressedClass(button);
 	}
 
 	private handleButtonClick(button: HTMLButtonElement): void {
-		const id = button.getAttribute('data-testid');
-		if (!id) {
+		const testId = button.dataset.testid;
+		if (!testId) {
 			console.error('Button has no data-testid attribute');
 			return;
 		}
 
-		const command = id?.replace('button-', '');
+		const command = testId.replace('button-', '');
 		if (command) {
 			this.calculator.handleCommand(command as CommandTag);
 			this.updateDisplay();
@@ -260,23 +432,8 @@ export class CalculatorUI {
 	}
 
 	private updateDisplay(): void {
-		const display = document.querySelector<HTMLInputElement>(
-			'.calculator [data-testid="calculator-display"]'
-		);
-
-		if (!display) {
-			return;
-		}
-
-		display.value = this.calculator.getDisplayValue();
-	}
-
-	private addButtonPressedClass(button: HTMLButtonElement) {
-		button.classList.add('button-pressed');
-	}
-
-	private removeButtonPressedClass(button: HTMLButtonElement) {
-		button.classList.remove('button-pressed');
+		if (!this.displayElement) return;
+		this.displayElement.value = this.calculator.getDisplayValue();
 	}
 
 	private handleKeyDown(event: KeyboardEvent) {
@@ -307,9 +464,7 @@ export class CalculatorUI {
 	private pressButton(key: string) {
 		const commandTag = CalculatorUI.KEY_TO_BUTTON_ID_MAP[key];
 		if (commandTag) {
-			const button = document.querySelector<HTMLButtonElement>(
-				`[data-testid="button-${commandTag}"]`
-			);
+			const button = this.buttonElements.get(commandTag);
 			if (button) {
 				button.classList.add('button-pressed');
 				button.click();
@@ -320,9 +475,7 @@ export class CalculatorUI {
 	private releaseButton(key: string) {
 		const commandTag = CalculatorUI.KEY_TO_BUTTON_ID_MAP[key];
 		if (commandTag) {
-			const button = document.querySelector<HTMLButtonElement>(
-				`[data-testid="button-${commandTag}"]`
-			);
+			const button = this.buttonElements.get(commandTag);
 			if (button) {
 				button.classList.remove('button-pressed');
 			}

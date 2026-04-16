@@ -181,4 +181,81 @@ test.describe('Calculator Edge Cases & Error Handling', () => {
 		await pressButtons(['clear-all', 'zero', 'decimal', 'zero', 'five']);
 		expect(await getDisplayValue()).toBe('0.05');
 	});
+
+	test('Limits inputs natively graphically to 15 digits', async () => {
+		for (let i = 0; i < 20; i++) {
+			await page.keyboard.press('9');
+		}
+		expect(await getDisplayValue()).toBe('9'.repeat(15));
+	});
+});
+
+test.describe('Keyboard & Accessibility Support', () => {
+	test('Accessibility attributes are thoroughly bound to display', async () => {
+		const display = page.locator('[data-testid="calculator-display"]');
+		await expect(display).toHaveAttribute('aria-live', 'polite');
+		await expect(display).toHaveAttribute('aria-label', 'Calculator display');
+		await expect(page.locator('[data-testid="button-add"]')).toHaveAttribute(
+			'aria-label',
+			'Add'
+		);
+	});
+
+	test('Keyboard seamlessly mirrors user UI interactions', async () => {
+		await page.keyboard.press('5');
+		await page.keyboard.press('+');
+		await page.keyboard.press('1');
+		await page.keyboard.press('0');
+		await page.keyboard.press('Enter');
+		expect(await getDisplayValue()).toBe('15');
+
+		await page.keyboard.press('Backspace');
+		expect(await getDisplayValue()).toBe('0');
+	});
+});
+
+test.describe('Practical Workflow Chains', () => {
+	test('Calculating 15% of 42.5 successfully models daily user cases', async () => {
+		// 15 % 42.5 = 6.375
+		await page.keyboard.type('15%42.5=');
+		expect(await getDisplayValue()).toBe('6.375');
+	});
+
+	test('Sequential operations compute immediately rather than following strict scientific PEMDAS', async () => {
+		// (5 + 3) * 2 = 16
+		await page.keyboard.type('5+3*2=');
+		expect(await getDisplayValue()).toBe('16');
+	});
+
+	test('Compound interest over 3 periods (1000 * 1.05³)', async () => {
+		await page.keyboard.type('1000*1.05=');
+		expect(await getDisplayValue()).toBe('1050');
+
+		await page.keyboard.type('*1.05=');
+		expect(await getDisplayValue()).toBe('1102.5');
+
+		await page.keyboard.type('*1.05=');
+		expect(await getDisplayValue()).toBe('1157.625');
+	});
+
+	test('Currency conversion and 3-way distribution split', async () => {
+		// Convert $500 at 0.85 rate, then split between 3 accounts
+		await page.keyboard.type('500*0.85/3=');
+		expect(await getDisplayValue()).toMatch(/^141\.66666/);
+	});
+
+	test('Area of a circle (πr² where r=5)', async () => {
+		// Calculate 5² = 25. Then * 3.14159.
+		await page.keyboard.type('5');
+		await page.click('[data-testid="button-square"]');
+		await page.keyboard.type('*3.14159=');
+		expect(await getDisplayValue()).toBe('78.53975');
+	});
+
+	test('Simple variance ((12 - 8)² / 2)', async () => {
+		await page.keyboard.type('12-8=');
+		await page.click('[data-testid="button-square"]');
+		await page.click('[data-testid="button-half"]');
+		expect(await getDisplayValue()).toBe('8');
+	});
 });

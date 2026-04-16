@@ -1,17 +1,28 @@
+import { Calculator } from '@/src/calculator';
+import { getCalculatorConfig, getUIButtonDefinitions, type CommandTag } from '@/src/definitions';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { Calculator, type CommandTag } from '../../src/calculator';
-import { CalculatorUI } from '../../src/calculator-ui';
 
 describe('Calculator', () => {
+    const config = getCalculatorConfig();
+	const buttons = getUIButtonDefinitions();
+
+	const contentToIdMap = buttons.reduce(
+		(acc, button) => {
+			acc[button.content] = button.id;
+			return acc;
+		},
+		{} as Record<string, CommandTag>
+	);
+
 	let calculator: Calculator;
-	const pressButtons = (buttons: CommandTag[]) => {
-		for (const button of buttons) {
-			calculator.handleCommand(button);
+	const pressButtons = (commands: CommandTag[]) => {
+		for (const command of commands) {
+			calculator.handleCommand(command);
 		}
 	};
 
 	beforeEach(() => {
-		calculator = new Calculator();
+		calculator = new Calculator(config);
 	});
 
 	describe('Basic Operations', () => {
@@ -25,12 +36,7 @@ describe('Calculator', () => {
 				{ op1: '9', op2: '1', expected: '10' },
 			].forEach(({ op1, op2, expected }) => {
 				it(`${op1} + ${op2} = ${expected}`, () => {
-					pressButtons([
-						CalculatorUI.CONTENT_TO_BUTTON_ID_MAP[op1],
-						'add',
-						CalculatorUI.CONTENT_TO_BUTTON_ID_MAP[op2],
-						'equals',
-					]);
+					pressButtons([contentToIdMap[op1], 'add', contentToIdMap[op2], 'equals']);
 					expect(calculator.getDisplayValue()).toBe(expected);
 				});
 			});
@@ -48,9 +54,9 @@ describe('Calculator', () => {
 				it(`${op1} + ${op2} = ${expected}`, () => {
 					pressButtons([
 						'subtract',
-						CalculatorUI.CONTENT_TO_BUTTON_ID_MAP[Math.abs(+op1)],
+						contentToIdMap[Math.abs(+op1)],
 						'add',
-						CalculatorUI.CONTENT_TO_BUTTON_ID_MAP[Math.abs(+op2)],
+						contentToIdMap[Math.abs(+op2)],
 						'equals',
 					]);
 					expect(calculator.getDisplayValue()).toBe(expected);
@@ -69,12 +75,7 @@ describe('Calculator', () => {
 				{ op1: '9', op2: '1', expected: '8' },
 			].forEach(({ op1, op2, expected }) => {
 				it(`${op1} - ${op2} = ${expected}`, () => {
-					pressButtons([
-						CalculatorUI.CONTENT_TO_BUTTON_ID_MAP[op1],
-						'subtract',
-						CalculatorUI.CONTENT_TO_BUTTON_ID_MAP[op2],
-						'equals',
-					]);
+					pressButtons([contentToIdMap[op1], 'subtract', contentToIdMap[op2], 'equals']);
 					expect(calculator.getDisplayValue()).toBe(expected);
 				});
 			});
@@ -91,9 +92,9 @@ describe('Calculator', () => {
 				it(`${op1} - ${op2} = ${expected}`, () => {
 					pressButtons([
 						'subtract',
-						CalculatorUI.CONTENT_TO_BUTTON_ID_MAP[Math.abs(+op1)],
+						contentToIdMap[Math.abs(+op1)],
 						'subtract',
-						CalculatorUI.CONTENT_TO_BUTTON_ID_MAP[Math.abs(+op2)],
+						contentToIdMap[Math.abs(+op2)],
 						'equals',
 					]);
 					expect(calculator.getDisplayValue()).toBe(expected);
@@ -112,9 +113,9 @@ describe('Calculator', () => {
 			].forEach(({ op1, op2, expected }) => {
 				it(`${op1} / ${op2} = ${expected}`, () => {
 					pressButtons([
-						CalculatorUI.CONTENT_TO_BUTTON_ID_MAP[Math.abs(+op1)],
+						contentToIdMap[Math.abs(+op1)],
 						'multiply',
-						CalculatorUI.CONTENT_TO_BUTTON_ID_MAP[Math.abs(+op2)],
+						contentToIdMap[Math.abs(+op2)],
 						'equals',
 					]);
 					expect(calculator.getDisplayValue()).toBe(expected);
@@ -132,9 +133,9 @@ describe('Calculator', () => {
 				it(`${op1} / ${op2} = ${expected}`, () => {
 					pressButtons([
 						'subtract',
-						CalculatorUI.CONTENT_TO_BUTTON_ID_MAP[Math.abs(+op1)],
+						contentToIdMap[Math.abs(+op1)],
 						'multiply',
-						CalculatorUI.CONTENT_TO_BUTTON_ID_MAP[Math.abs(+op2)],
+						contentToIdMap[Math.abs(+op2)],
 						'equals',
 					]);
 					expect(calculator.getDisplayValue()).toBe(expected);
@@ -153,9 +154,9 @@ describe('Calculator', () => {
 			].forEach(({ op1, op2, expected }) => {
 				it(`${op1} / ${op2} = ${expected}`, () => {
 					pressButtons([
-						CalculatorUI.CONTENT_TO_BUTTON_ID_MAP[Math.abs(+op1)],
+						contentToIdMap[Math.abs(+op1)],
 						'divide',
-						CalculatorUI.CONTENT_TO_BUTTON_ID_MAP[Math.abs(+op2)],
+						contentToIdMap[Math.abs(+op2)],
 						'equals',
 					]);
 					expect(calculator.getDisplayValue()).toBe(expected);
@@ -365,7 +366,7 @@ describe('Calculator', () => {
 			pressButtons(['five', 'add', 'one', 'zero']);
 			const extractedState = calculator.getState();
 
-			const newCalculator = new Calculator();
+			const newCalculator = new Calculator(config);
 			newCalculator.setState(extractedState);
 			newCalculator.handleCommand('equals');
 			expect(newCalculator.getDisplayValue()).toBe('15');

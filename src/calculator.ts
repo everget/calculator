@@ -1,51 +1,10 @@
-type DigitTag =
-	| 'one'
-	| 'two'
-	| 'three'
-	| 'four'
-	| 'five'
-	| 'six'
-	| 'seven'
-	| 'eight'
-	| 'nine'
-	| 'zero';
-
-type UnaryOperationTag = 'half' | 'square' | 'sqrt' | 'ln';
-
-type BinaryOperationTag =
-	| 'add'
-	| 'subtract'
-	| 'multiply'
-	| 'divide'
-	| 'power'
-	| 'mod'
-	| 'percent'
-	| 'log';
-
-type ControlTag = 'clear-all' | 'equals';
-
-// Type helper to check if types are mutually exclusive (have no overlap)
-type AreMutuallyExclusive<T extends string, U extends string> =
-	Exclude<T, U> extends T ? (Exclude<U, T> extends U ? true : false) : false;
-
-// Type helper to check if multiple types are mutually exclusive
-type AreAllMutuallyExclusive<T extends readonly unknown[]> = T extends [
-	infer A extends string,
-	infer B extends string,
-	...infer Rest,
-]
-	? AreMutuallyExclusive<A, B> extends true
-		? AreAllMutuallyExclusive<[B, ...Rest]>
-		: false
-	: true;
-
-// This type will only be valid if all command types are mutually exclusive
-export type CommandTag =
-	AreAllMutuallyExclusive<
-		[DigitTag, UnaryOperationTag, BinaryOperationTag, ControlTag, 'decimal']
-	> extends true
-		? DigitTag | UnaryOperationTag | BinaryOperationTag | ControlTag | 'decimal'
-		: never;
+import {
+	type BinaryOperationTag,
+	type CalculatorConfig,
+	type CommandTag,
+	type DigitTag,
+	type UnaryOperationTag,
+} from './definitions';
 
 interface PendingOperation {
 	operator: BinaryOperationTag;
@@ -112,67 +71,6 @@ export class NumberInput {
 	}
 }
 
-const ERROR_MESSAGE = 'ERROR';
-
-const VALID_COMMANDS: readonly CommandTag[] = [
-	'one',
-	'two',
-	'three',
-	'four',
-	'five',
-	'six',
-	'seven',
-	'eight',
-	'nine',
-	'zero',
-	'half',
-	'square',
-	'sqrt',
-	'ln',
-	'add',
-	'subtract',
-	'multiply',
-	'divide',
-	'power',
-	'mod',
-	'percent',
-	'log',
-	'clear-all',
-	'equals',
-	'decimal',
-];
-
-const DIGITS_MAP: Record<DigitTag, string> = {
-	one: '1',
-	two: '2',
-	three: '3',
-	four: '4',
-	five: '5',
-	six: '6',
-	seven: '7',
-	eight: '8',
-	nine: '9',
-	zero: '0',
-};
-
-const UNARY_OPERATIONS: Record<UnaryOperationTag, (a: number) => number> = {
-	half: (a: number) => a / 2,
-	square: (a: number) => a ** 2,
-	sqrt: (a: number) => Math.sqrt(a),
-	ln: (a: number) => Math.log(a),
-};
-
-const BINARY_OPERATIONS: Record<BinaryOperationTag, (a: number, b: number) => number> = {
-	add: (a: number, b: number) => a + b,
-	subtract: (a: number, b: number) => a - b,
-	multiply: (a: number, b: number) => a * b,
-	divide: (a: number, b: number) => a / b,
-	power: (a: number, b: number) => a ** b,
-	mod: (a: number, b: number) => a % b,
-	percent: (a: number, b: number) => (a * b) / 100,
-	log: (a: number, b: number) => Math.log(a) / Math.log(b),
-};
-
 export type CalculatorState =
 	| { type: 'idle' }
 	| { type: 'entering-number'; input: NumberInput; pending: PendingOperation | null }
@@ -187,8 +85,11 @@ export interface ICalculator {
 
 export class Calculator implements ICalculator {
 	#state: CalculatorState = { type: 'idle' };
+	private readonly config: CalculatorConfig;
 
-	constructor() {}
+	constructor(config: CalculatorConfig) {
+		this.config = config;
+	}
 
 	getDisplayValue(): string {
 		switch (this.#state.type) {
@@ -197,19 +98,21 @@ export class Calculator implements ICalculator {
 			case 'entering-number': {
 				if (this.#state.input.isEmpty()) return '0';
 				const value = this.#state.input.toNumber();
-				return this.isFiniteNumber(value) ? this.#state.input.toString() : ERROR_MESSAGE;
+				return this.isFiniteNumber(value)
+					? this.#state.input.toString()
+					: this.config.errorMsg;
 			}
 			case 'awaiting-operand':
 				return String(this.#state.firstOperand);
 			case 'result':
 				return String(this.#state.value);
 			case 'error':
-				return ERROR_MESSAGE;
+				return this.config.errorMsg;
 		}
 	}
 
 	handleCommand(command: CommandTag): void {
-		if (!Calculator.isValidCommand(command)) {
+		if (!this.isValidCommand(command)) {
 			console.error('Invalid command:', command);
 			return;
 		}
@@ -266,7 +169,7 @@ export class Calculator implements ICalculator {
 		if (this.isDigit(command)) {
 			return {
 				type: 'entering-number',
-				input: new NumberInput().addDigit(DIGITS_MAP[command]),
+				input: new NumberInput().addDigit(this.config.digitsMap[command]),
 				pending: null,
 			};
 		}
@@ -288,7 +191,7 @@ export class Calculator implements ICalculator {
 			return { type: 'awaiting-operand', operator: command, firstOperand: 0 };
 		}
 		if (this.isUnaryOperator(command)) {
-			const result = UNARY_OPERATIONS[command](0);
+			const result = this.config.unaryOps[command](0);
 			if (!this.isFiniteNumber(result)) return { type: 'error' };
 			return { type: 'result', value: result };
 		}
@@ -300,7 +203,7 @@ export class Calculator implements ICalculator {
 		command: CommandTag
 	): CalculatorState {
 		if (this.isDigit(command)) {
-			return { ...state, input: state.input.addDigit(DIGITS_MAP[command]) };
+			return { ...state, input: state.input.addDigit(this.config.digitsMap[command]) };
 		}
 		if (this.isDecimal(command)) {
 			return { ...state, input: state.input.addDecimal() };
@@ -312,7 +215,7 @@ export class Calculator implements ICalculator {
 			const currentValue = state.input.toNumber();
 
 			if (state.pending) {
-				const result = BINARY_OPERATIONS[state.pending.operator](
+				const result = this.config.binaryOps[state.pending.operator](
 					state.pending.firstOperand,
 					currentValue
 				);
@@ -325,7 +228,7 @@ export class Calculator implements ICalculator {
 		if (command === 'equals') {
 			if (state.pending) {
 				const currentValue = state.input.toNumber();
-				const result = BINARY_OPERATIONS[state.pending.operator](
+				const result = this.config.binaryOps[state.pending.operator](
 					state.pending.firstOperand,
 					currentValue
 				);
@@ -336,7 +239,7 @@ export class Calculator implements ICalculator {
 		}
 		if (this.isUnaryOperator(command)) {
 			const currentValue = state.input.toNumber();
-			const result = UNARY_OPERATIONS[command](currentValue);
+			const result = this.config.unaryOps[command](currentValue);
 			if (!this.isFiniteNumber(result)) return { type: 'error' };
 			return { ...state, input: NumberInput.fromNumber(result) };
 		}
@@ -355,7 +258,7 @@ export class Calculator implements ICalculator {
 		if (this.isDigit(command)) {
 			return {
 				type: 'entering-number',
-				input: new NumberInput().addDigit(DIGITS_MAP[command]),
+				input: new NumberInput().addDigit(this.config.digitsMap[command]),
 				pending,
 			};
 		}
@@ -369,12 +272,12 @@ export class Calculator implements ICalculator {
 			return { ...state, operator: command };
 		}
 		if (this.isUnaryOperator(command)) {
-			const result = UNARY_OPERATIONS[command](state.firstOperand);
+			const result = this.config.unaryOps[command](state.firstOperand);
 			if (!this.isFiniteNumber(result)) return { type: 'error' };
 			return { ...state, firstOperand: result };
 		}
 		if (command === 'equals') {
-			const result = BINARY_OPERATIONS[state.operator](
+			const result = this.config.binaryOps[state.operator](
 				state.firstOperand,
 				state.firstOperand
 			);
@@ -391,7 +294,7 @@ export class Calculator implements ICalculator {
 		if (this.isDigit(command)) {
 			return {
 				type: 'entering-number',
-				input: new NumberInput().addDigit(DIGITS_MAP[command]),
+				input: new NumberInput().addDigit(this.config.digitsMap[command]),
 				pending: null,
 			};
 		}
@@ -406,7 +309,7 @@ export class Calculator implements ICalculator {
 			return { type: 'awaiting-operand', operator: command, firstOperand: state.value };
 		}
 		if (this.isUnaryOperator(command)) {
-			const result = UNARY_OPERATIONS[command](state.value);
+			const result = this.config.unaryOps[command](state.value);
 			if (!this.isFiniteNumber(result)) return { type: 'error' };
 			return { type: 'result', value: result };
 		}
@@ -419,20 +322,23 @@ export class Calculator implements ICalculator {
 		return typeof value === 'number' && Number.isFinite(value);
 	}
 
-	private static isValidCommand(command: unknown): command is CommandTag {
-		return typeof command === 'string' && VALID_COMMANDS.includes(command as CommandTag);
+	private isValidCommand(command: unknown): command is CommandTag {
+		return (
+			typeof command === 'string' &&
+			this.config.validCommands.includes(command as unknown as CommandTag)
+		);
 	}
 
 	private isUnaryOperator(command: CommandTag): command is UnaryOperationTag {
-		return Object.keys(UNARY_OPERATIONS).includes(command);
+		return Object.keys(this.config.unaryOps).includes(command);
 	}
 
 	private isBinaryOperator(command: CommandTag): command is BinaryOperationTag {
-		return Object.keys(BINARY_OPERATIONS).includes(command);
+		return Object.keys(this.config.binaryOps).includes(command);
 	}
 
 	private isDigit(command: CommandTag): command is DigitTag {
-		return Object.keys(DIGITS_MAP).includes(command);
+		return Object.keys(this.config.digitsMap).includes(command);
 	}
 
 	private isDecimal(command: CommandTag): command is 'decimal' {

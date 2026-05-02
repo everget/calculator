@@ -1,8 +1,10 @@
 node_modules
 
-_dev/*
+# Local dev notes (not part of the repo)
+_dev/
 
-.claude/worktrees/*
+# Claude Code & worktrees
+.claude/
 
 coverage
 tests/e2e/test-results

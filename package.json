@@ -1,17 +1,16 @@
 {
   "name": "calculator",
-  "private": true,
   "version": "1.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "// --- BUILDING ---": "",
-    "build": "pnpm run build:swap:dev && tsc && vite build && pnpm run build:swap:prod",
-    "build:swap": "node ./scripts/swap-urls.mjs",
-    "build:swap:dev": "pnpm run build:swap -- --dev",
-    "build:swap:prod": "pnpm run build:swap -- --prod",
-    "dev": "pnpm run build:swap:dev && vite",
-    "preview": "pnpm run build && vite preview",
+    "build": "pnpm run build:prebuild && tsc && vite build && pnpm run build:postbuild",
+    "build:prebuild": "pnpm run fix && pnpm run check && pnpm run test",
+    "build:postbuild": "pnpm run fix",
+    "dev": "vite",
+    "preview": "vite preview",
     "// --- CHECKING & FORMATTING & LINTING ---": "",
     "check": "pnpm run typecheck && pnpm run format:check && pnpm run lint:check",
     "fix": "pnpm run format:fix && pnpm run lint:fix",
@@ -29,7 +28,7 @@
     "test:e2e:ui": "pnpm exec playwright test --ui --project chromium",
     "test:watch": "vitest",
     "// --- CI ---": "",
-    "ci:lint": "pnpm run check",
+    "ci:check": "pnpm run check",
     "ci:test:unit": "pnpm run coverage",
     "ci:test:e2e": "pnpm run test:e2e"
   },
@@ -48,5 +47,5 @@
     "vite": "^8.0.8",
     "vitest": "^4.1.4"
   },
-  "packageManager": "pnpm@9.11.0+sha512.0a203ffaed5a3f63242cd064c8fb5892366c103e328079318f78062f24ea8c9d50bc6a47aa3567cabefd824d170e78fa2745ed1f16b132e16436146b7688f19b"
+  "packageManager": "pnpm@10.33.2+sha512.a90faf6feeab71ad6c6e57f94e0fe1a12f5dcc22cd754db40ae9593eb6a3e0b6b12e3540218bb37ae083404b1f2ce6db2a4121e979829b4aff94b99f49da1cf8"
 }
